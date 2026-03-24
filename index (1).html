@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ayush Pattanayak</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@200;300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+  <style>
+    /* ================================================
+       CSS CUSTOM PROPERTIES — DESIGN SYSTEM
+    ================================================ */
+    :root {
+      --bg-primary:     #080808;
+      --bg-secondary:   #0e0e0e;
+      --bg-card:        #111111;
+      --fg-primary:     #e8e2d9;
+      --fg-muted:       #4a4540;
+      --fg-dim:         #2a2725;
+      --accent:         #c9a96e;
+      --accent-dim:     rgba(201,169,110,0.15);
+      --accent-glow:    rgba(201,169,110,0.08);
+      --danger:         #8b2020;
+      --white:          #ffffff;
+
+      --font-display:   'Bebas Neue', sans-serif;
+      --font-serif:     'Playfair Display', serif;
+      --font-sans:      'DM Sans', sans-serif;
+
+      --transition-slow:   0.8s cubic-bezier(0.16,1,0.3,1);
+      --transition-med:    0.4s cubic-bezier(0.16,1,0.3,1);
+      --transition-fast:   0.2s ease;
+    }
+
+    /* ================================================
+       GLOBAL RESET & BASE
+    ================================================ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--fg-primary);
+      font-family: var(--font-sans);
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+      line-height: 1.7;
+    }
+
+    /* Perspective shift mode — REMOVED */
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 2px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--fg-muted); }
+
+    /* Smooth scroll offset for fixed nav */
+    section { scroll-margin-top: 60px; }
+
+    /* ================================================
+       CUSTOM CURSOR
+    ================================================ */
+    .cursor-dot {
+      position: fixed;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%,-50%);
+      transition: opacity 0.3s;
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid rgba(201,169,110,0.4);
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: width 0.3s, height 0.3s, border-color 0.3s;
+    }
+    .cursor-ring.hovered {
+      width: 52px; height: 52px;
+      border-color: var(--accent);
+    }
+
+    /* ================================================
+       GRAIN / NOISE OVERLAY
+    ================================================ */
+    .grain-overlay {
+      position: fixed;
+      inset: 0;
+      width: 100%; height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9000;
+      mix-blend-mode: overlay;
+    }
+
+    /* ================================================
+       NAVIGATION
+    ================================================ */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 22px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.5s ease, padding 0.4s ease, backdrop-filter 0.5s ease;
+    }
+    nav.scrolled {
+      background: rgba(8,8,8,0.92);
+      backdrop-filter: blur(14px);
+      padding: 14px 48px;
+      border-bottom: 1px solid rgba(201,169,110,0.08);
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      letter-spacing: 0.3em;
+      color: var(--fg-primary);
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity var(--transition-fast);
+    }
+    .nav-logo:hover { opacity: 1; }
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 0;
+      width: 0; height: 1px;
+      background: var(--accent);
+      transition: width var(--transition-med);
+    }
+    .nav-links a:hover { color: var(--fg-primary); }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-links a.instagram-link {
+      color: var(--accent);
+      opacity: 0.7;
+    }
+    .nav-links a.instagram-link:hover { opacity: 1; }
+
+    /* ================================================
+       SCENE LABEL
+    ================================================ */
+    .scene-label {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.65rem;
+      font-weight: 400;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+      margin-bottom: 56px;
+    }
+    .scene-label span { color: var(--accent); margin-right: 4px; }
+
+    /* ================================================
+       HERO SECTION
+    ================================================ */
+    #home {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Animated background — subtle radial pulse */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 50%,
+        rgba(201,169,110,0.04) 0%,
+        transparent 70%);
+      animation: heroBgPulse 8s ease-in-out infinite;
+    }
+    @keyframes heroBgPulse {
+      0%,100% { opacity: 0.4; }
+      50%      { opacity: 1; }
+    }
+
+    /* Parallax depth layers */
+    .parallax-layer {
+      position: absolute;
+      inset: -10%;
+      width: 120%; height: 120%;
+      transform: translateZ(0);
+    }
+    .parallax-far {
+      background:
+        radial-gradient(ellipse 30% 20% at 20% 80%, rgba(139,32,32,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 20% 30% at 80% 20%, rgba(201,169,110,0.04) 0%, transparent 60%);
+      opacity: 0.6;
+    }
+    .parallax-mid {
+      background:
+        radial-gradient(ellipse 15% 40% at 70% 60%, rgba(201,169,110,0.03) 0%, transparent 60%);
+      opacity: 0.8;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      transform: translateZ(0);
+    }
+    .hero-name {
+      font-family: var(--font-display);
+      font-size: clamp(3.5rem, 11vw, 10rem);
+      letter-spacing: 0.18em;
+      line-height: 0.95;
+      color: var(--fg-primary);
+      margin-bottom: 16px;
+      /* Subtle text reveal on load */
+      animation: fadeUp 1.4s var(--transition-slow) both;
+    }
+    .hero-epithet {
+      font-family: var(--font-sans);
+      font-size: clamp(0.7rem, 1.2vw, 0.85rem);
+      font-weight: 400;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 48px;
+      animation: fadeUp 1.4s 0.2s var(--transition-slow) both;
+    }
+    .hero-tagline {
+      font-family: var(--font-serif);
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      font-weight: 400;
+      font-style: italic;
+      color: rgba(232,226,217,0.55);
+      letter-spacing: 0.04em;
+      min-height: 2em;
+      transition: opacity 0.5s ease;
+      animation: fadeUp 1.4s 0.4s var(--transition-slow) both;
+    }
+    .hero-tagline.fade-out { opacity: 0; }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      animation: fadeUp 1.4s 1s var(--transition-slow) both;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 50px;
+      background: linear-gradient(to bottom, transparent, var(--fg-muted));
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+      0%,100% { opacity: 0.3; transform: scaleY(1); }
+      50%      { opacity: 1;   transform: scaleY(1.2); }
+    }
+    .scroll-text {
+      font-size: 0.5rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ================================================
+       GENERAL SECTION LAYOUT
+    ================================================ */
+    .section-wrapper {
+      padding: 120px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* Scene fade-in on scroll */
+    .scene {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+    .scene.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Divider line */
+    .section-line {
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--fg-muted), transparent);
+      margin: 0 auto 80px;
+    }
+
+    /* ================================================
+       PROJECTS SECTION — Scene 02
+    ================================================ */
+    #projects { border-top: 1px solid var(--bg-card); }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      letter-spacing: 0.15em;
+      color: var(--fg-primary);
+      margin-bottom: 64px;
+    }
+
+    .project-card {
+      border: 1px solid var(--bg-card);
+      border-top: 1px solid var(--fg-dim);
+      padding: 36px 0;
+      cursor: none;
+      transition: border-color var(--transition-med);
+      position: relative;
+      overflow: hidden;
+    }
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--accent), transparent);
+      transform: scaleX(0);
+      transition: transform var(--transition-slow);
+    }
+    .project-card:hover::before { transform: scaleX(1); }
+
+    .project-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+    }
+    .project-name {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4vw, 3.2rem);
+      letter-spacing: 0.15em;
+      color: var(--fg-primary);
+      transition: color var(--transition-med), text-shadow var(--transition-med);
+    }
+    .project-card:hover .project-name {
+      color: var(--accent);
+      text-shadow: 0 0 40px var(--accent-dim);
+    }
+    .project-toggle {
+      font-size: 1.4rem;
+      color: var(--fg-muted);
+      transition: transform var(--transition-med), color var(--transition-med);
+      line-height: 1;
+      user-select: none;
+    }
+    .project-card.open .project-toggle {
+      transform: rotate(45deg);
+      color: var(--accent);
+    }
+    .project-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.8s cubic-bezier(0.16,1,0.3,1), opacity 0.6s ease;
+      opacity: 0;
+    }
+    .project-card.open .project-body {
+      max-height: 300px;
+      opacity: 1;
+    }
+    .project-desc {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.85;
+      color: rgba(232,226,217,0.6);
+      padding: 28px 4px 4px;
+      border-left: 1px solid var(--accent-dim);
+      padding-left: 20px;
+      margin-top: 20px;
+    }
+    .project-meta {
+      font-size: 0.65rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--fg-dim);
+      margin-top: 12px;
+      padding-left: 21px;
+    }
+
+    /* ================================================
+       UPCOMING SECTION — Scene 03
+    ================================================ */
+    #upcoming { border-top: 1px solid var(--bg-card); }
+
+    .upcoming-grid {
+      display: grid;
+      gap: 2px;
+    }
+    .upcoming-item {
+      position: relative;
+      padding: 48px 0;
+      border-bottom: 1px solid var(--bg-card);
+      overflow: hidden;
+      cursor: none;
+    }
+    .upcoming-item-inner {
+      display: flex;
+      align-items: baseline;
+      gap: 24px;
+    }
+    .upcoming-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3.5vw, 2.8rem);
+      letter-spacing: 0.15em;
+      color: var(--fg-dim);
+      transition: color var(--transition-med), text-shadow var(--transition-med);
+    }
+    .upcoming-item:hover .upcoming-title {
+      color: var(--fg-primary);
+      text-shadow: 0 0 30px rgba(232,226,217,0.1);
+    }
+    .upcoming-status {
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--fg-dim);
+      border: 1px solid var(--fg-dim);
+      padding: 3px 10px;
+      transition: border-color var(--transition-med), color var(--transition-med);
+    }
+    .upcoming-item:hover .upcoming-status {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .upcoming-reveal {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-style: italic;
+      font-weight: 400;
+      color: rgba(232,226,217,0.5);
+      margin-top: 0;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.7s ease, opacity 0.7s ease, margin-top 0.5s ease;
+    }
+    .upcoming-item:hover .upcoming-reveal {
+      max-height: 80px;
+      opacity: 1;
+      margin-top: 16px;
+    }
+
+    /* Glitch flicker effect */
+    .upcoming-title.glitch {
+      animation: glitchFlicker 0.12s steps(2) 3;
+    }
+    @keyframes glitchFlicker {
+      0%   { clip-path: inset(40% 0 50% 0); transform: translateX(-2px); }
+      25%  { clip-path: inset(10% 0 70% 0); transform: translateX(2px); }
+      50%  { clip-path: inset(60% 0 20% 0); transform: translateX(-1px); }
+      75%  { clip-path: inset(80% 0 5%  0); transform: translateX(1px); }
+      100% { clip-path: none; transform: none; }
+    }
+
+    /* ================================================
+       PRESENCE SECTION — Scene 04
+    ================================================ */
+    #presence {
+      border-top: 1px solid var(--bg-card);
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+    }
+    .presence-inner {
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .presence-text {
+      font-family: var(--font-serif);
+      font-size: clamp(1.25rem, 3vw, 2rem);
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.9;
+      color: rgba(232,226,217,0.55);
+      letter-spacing: 0.02em;
+    }
+    .presence-text em {
+      color: var(--fg-primary);
+      font-style: normal;
+    }
+    .presence-line {
+      width: 60px; height: 1px;
+      background: var(--accent);
+      margin: 40px auto;
+      opacity: 0.4;
+    }
+
+    /* ================================================
+       CONTACT SECTION
+    ================================================ */
+    #contact { border-top: 1px solid var(--bg-card); }
+
+    .contact-inner {
+      max-width: 600px;
+    }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--bg-card);
+    }
+    .contact-label {
+      font-size: 0.65rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+      min-width: 80px;
+    }
+    .contact-value {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--fg-primary);
+      text-decoration: none;
+      transition: color var(--transition-med), text-shadow var(--transition-med);
+    }
+    .contact-value:hover {
+      color: var(--accent);
+      text-shadow: 0 0 20px var(--accent-dim);
+    }
+    .instagram-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 52px;
+      padding: 14px 32px;
+      border: 1px solid var(--fg-muted);
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+      text-decoration: none;
+      transition: all var(--transition-med);
+    }
+    .instagram-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 30px var(--accent-glow), inset 0 0 20px var(--accent-glow);
+    }
+    .instagram-btn svg {
+      width: 14px; height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.5;
+    }
+
+    /* ================================================
+       FOOTER
+    ================================================ */
+    footer {
+      border-top: 1px solid var(--bg-card);
+      padding: 60px 48px;
+      text-align: center;
+    }
+    .footer-text {
+      font-family: var(--font-serif);
+      font-size: 0.85rem;
+      font-style: italic;
+      font-weight: 300;
+      color: var(--fg-dim);
+      letter-spacing: 0.12em;
+    }
+    .footer-sub {
+      font-size: 0.5rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--fg-dim);
+      margin-top: 12px;
+      opacity: 0.4;
+    }
+
+    /* ================================================
+       HERO NAME — subtle letter-spacing on hover only
+    ================================================ */
+    .hero-name {
+      transition: letter-spacing var(--transition-slow);
+    }
+    .hero-name:hover {
+      letter-spacing: 0.22em;
+    }
+
+    /* ================================================
+       RESPONSIVE
+    ================================================ */
+    @media (max-width: 768px) {
+      nav { padding: 18px 24px; }
+      nav.scrolled { padding: 12px 24px; }
+      .nav-links { gap: 18px; }
+      .nav-links a { font-size: 0.58rem; letter-spacing: 0.12em; }
+      .section-wrapper { padding: 80px 24px; }
+      .shift-btn { bottom: 24px; right: 24px; }
+      .contact-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+    @media (max-width: 480px) {
+      .nav-links { gap: 12px; }
+      .hero-epithet { letter-spacing: 0.25em; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ GRAIN OVERLAY ============ -->
+  <div class="grain-overlay" aria-hidden="true"></div>
+
+  <!-- ============ CURSOR ============ -->
+  <div class="cursor-dot"  id="cursorDot"  aria-hidden="true"></div>
+  <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+
+  <!-- ============ NAVIGATION ============ -->
+  <nav id="mainNav" role="navigation" aria-label="Main navigation">
+    <a href="#home" class="nav-logo">A · P</a>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#upcoming">Upcoming</a></li>
+      <li><a href="#presence">Presence</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="https://www.instagram.com/vynthr.styx?igsh=MWVkc3U3dmdreGZsdA==" target="_blank" rel="noopener" class="instagram-link">Instagram</a></li>
+    </ul>
+  </nav>
+
+  <!-- =========================================
+       HERO SECTION — Scene 01: Identity
+  ========================================== -->
+  <section id="home" aria-label="Hero section">
+    <div class="parallax-layer parallax-far"  id="parallaxFar"  aria-hidden="true"></div>
+    <div class="parallax-layer parallax-mid"  id="parallaxMid"  aria-hidden="true"></div>
+    <div class="hero-bg" aria-hidden="true"></div>
+
+    <div class="hero-content" id="heroContent">
+      <p class="hero-epithet">Scene 01 &mdash; Identity</p>
+      <h1 class="hero-name">AYUSH PATTANAYAK</h1>
+      <p class="hero-epithet" style="margin-top:8px; margin-bottom:40px;">God Complex</p>
+      <p class="hero-tagline" id="heroTagline" aria-live="polite">Control is an illusion.</p>
+    </div>
+
+    <div class="scroll-indicator" aria-hidden="true">
+      <div class="scroll-line"></div>
+      <span class="scroll-text">Scroll</span>
+    </div>
+  </section>
+
+  <!-- =========================================
+       PROJECTS SECTION — Scene 02: Distortion
+  ========================================== -->
+  <section id="projects" aria-label="Projects">
+    <div class="section-wrapper scene" data-scene>
+      <span class="scene-label"><span>—</span> Scene 02 &mdash; Distortion</span>
+      <h2 class="section-title">Projects</h2>
+
+      <div class="project-card" id="proj-parallax" role="button" tabindex="0" aria-expanded="false">
+        <div class="project-header">
+          <span class="project-name">Parallax</span>
+          <span class="project-toggle" aria-hidden="true">+</span>
+        </div>
+        <div class="project-body" id="proj-parallax-body">
+          <p class="project-desc">
+            A psychological exploration of perception, where reality fractures between what is seen and what is felt. A story told through silence, repetition, and shifting perspective.
+          </p>
+          <p class="project-meta">Short Film &nbsp;&bull;&nbsp; 2026 &nbsp;&bull;&nbsp; In Development</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       UPCOMING SECTION — Scene 03: Projection
+  ========================================== -->
+  <section id="upcoming" aria-label="Upcoming projects">
+    <div class="section-wrapper scene" data-scene>
+      <span class="scene-label"><span>—</span> Scene 03 &mdash; Projection</span>
+      <h2 class="section-title">Upcoming</h2>
+
+      <div class="upcoming-grid">
+
+        <div class="upcoming-item" data-glitch>
+          <div class="upcoming-item-inner">
+            <span class="upcoming-title">Untitled_01</span>
+            <span class="upcoming-status">In Progress</span>
+          </div>
+          <p class="upcoming-reveal">
+            Not everything meant to be seen is ready to be understood.
+          </p>
+        </div>
+
+        <div class="upcoming-item" data-glitch>
+          <div class="upcoming-item-inner">
+            <span class="upcoming-title">Phase II</span>
+            <span class="upcoming-status">Evolving</span>
+          </div>
+          <p class="upcoming-reveal">
+            The second take is never the same.
+          </p>
+        </div>
+
+        <div class="upcoming-item" data-glitch>
+          <div class="upcoming-item-inner">
+            <span class="upcoming-title">The Second Take</span>
+            <span class="upcoming-status">Conceptual</span>
+          </div>
+          <p class="upcoming-reveal">
+            A meta-psychological piece. Mostly silence. Mostly real.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       PRESENCE SECTION — Scene 04: Emergence
+  ========================================== -->
+  <section id="presence" aria-label="About">
+    <div class="section-wrapper scene" data-scene>
+      <span class="scene-label"><span>—</span> Scene 04 &mdash; Emergence</span>
+      <div class="presence-inner">
+        <h2 class="section-title" style="text-align:center; margin-bottom: 48px;">Presence</h2>
+        <div class="presence-line"></div>
+        <p class="presence-text">
+          <em>Not a creator.</em> Not an observer.<br>
+          Somewhere in between.
+        </p>
+        <div class="presence-line"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       CONTACT SECTION
+  ========================================== -->
+  <section id="contact" aria-label="Contact">
+    <div class="section-wrapper scene" data-scene>
+      <span class="scene-label"><span>—</span> Contact</span>
+      <h2 class="section-title">Contact</h2>
+
+      <div class="contact-inner">
+        <div class="contact-item">
+          <span class="contact-label">Instagram</span>
+          <a class="contact-value" href="https://www.instagram.com/vynthr.styx?igsh=MWVkc3U3dmdreGZsdA==" target="_blank" rel="noopener">vynthr.styx</a>
+        </div>
+      </div>
+
+      <a class="instagram-btn"
+         href="https://www.instagram.com/vynthr.styx?igsh=MWVkc3U3dmdreGZsdA=="
+         target="_blank"
+         rel="noopener"
+         aria-label="Visit Instagram profile">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+          <circle cx="12" cy="12" r="4"/>
+          <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
+        </svg>
+        vynthr.styx
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <p class="footer-text">&ldquo;This was only one version.&rdquo;</p>
+    <p class="footer-sub">Ayush Pattanayak &mdash; All rights reserved</p>
+  </footer>
+
+  <!-- =========================================
+       JAVASCRIPT
+  ========================================== -->
+  <script>
+    /* ------------------------------------------------
+       CURSOR + PARALLAX — single unified RAF loop
+    ------------------------------------------------ */
+    const dot  = document.getElementById('cursorDot');
+    const ring = document.getElementById('cursorRing');
+    let mouseX = 0, mouseY = 0;
+    let ringX  = 0, ringY  = 0;
+    let ticking = false;
+
+    document.addEventListener('mousemove', e => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      // Dot follows instantly via direct style (no RAF overhead)
+      dot.style.left = mouseX + 'px';
+      dot.style.top  = mouseY + 'px';
+    });
+
+    // Hover state for ring
+    document.querySelectorAll('a, button, .project-card, .upcoming-item, [tabindex]').forEach(el => {
+      el.addEventListener('mouseenter', () => ring.classList.add('hovered'));
+      el.addEventListener('mouseleave', () => ring.classList.remove('hovered'));
+    });
+
+    /* ------------------------------------------------
+       NAVIGATION — transparent → solid on scroll
+    ------------------------------------------------ */
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+    /* ------------------------------------------------
+       HERO TAGLINES — cycle with fade
+    ------------------------------------------------ */
+    const taglines = [
+      "Control is an illusion.",
+      "Perception defines reality.",
+      "You're only seeing one version.",
+      "There was another take."
+    ];
+
+    let taglineIndex = 0;
+    const taglineEl  = document.getElementById('heroTagline');
+
+    function cycleTagline() {
+      taglineEl.classList.add('fade-out');
+      setTimeout(() => {
+        taglineIndex = (taglineIndex + 1) % taglines.length;
+        taglineEl.textContent = taglines[taglineIndex];
+        taglineEl.classList.remove('fade-out');
+      }, 500);
+    }
+    setInterval(cycleTagline, 3800);
+
+    /* ------------------------------------------------
+       UNIFIED RAF — ring + parallax in one loop
+    ------------------------------------------------ */
+    const heroContent  = document.getElementById('heroContent');
+    const parallaxFar  = document.getElementById('parallaxFar');
+    const parallaxMid  = document.getElementById('parallaxMid');
+
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
+
+    document.addEventListener('mousemove', e => {
+      const cx = window.innerWidth  / 2;
+      const cy = window.innerHeight / 2;
+      targetX = (e.clientX - cx) / cx;
+      targetY = (e.clientY - cy) / cy;
+    });
+
+    (function unifiedLoop() {
+      // Ring easing — snappier than before (0.18 vs 0.12)
+      ringX += (mouseX - ringX) * 0.18;
+      ringY += (mouseY - ringY) * 0.18;
+      ring.style.left = ringX + 'px';
+      ring.style.top  = ringY + 'px';
+
+      // Parallax easing — faster response (0.07 vs 0.04)
+      currentX += (targetX - currentX) * 0.07;
+      currentY += (targetY - currentY) * 0.07;
+
+      // Reduced movement range to cut GPU work
+      heroContent.style.transform  = `translate(${currentX * 5}px, ${currentY * 3}px)`;
+      parallaxFar.style.transform  = `translate(${currentX * -12}px, ${currentY * -8}px)`;
+      parallaxMid.style.transform  = `translate(${currentX * -6}px, ${currentY * -4}px)`;
+
+      requestAnimationFrame(unifiedLoop);
+    })();
+
+    /* ------------------------------------------------
+       SCROLL — scene fade-in (Intersection Observer)
+    ------------------------------------------------ */
+    const scenes = document.querySelectorAll('[data-scene]');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    scenes.forEach(s => observer.observe(s));
+
+    /* ------------------------------------------------
+       PROJECT CARDS — click to expand
+    ------------------------------------------------ */
+    document.querySelectorAll('.project-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const isOpen = card.classList.contains('open');
+        // Close all
+        document.querySelectorAll('.project-card').forEach(c => {
+          c.classList.remove('open');
+          c.setAttribute('aria-expanded', 'false');
+        });
+        // Open clicked (if was closed)
+        if (!isOpen) {
+          card.classList.add('open');
+          card.setAttribute('aria-expanded', 'true');
+        }
+      });
+      // Keyboard support
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          card.click();
+        }
+      });
+    });
+
+    /* ------------------------------------------------
+       UPCOMING — random glitch flicker on mouse enter
+    ------------------------------------------------ */
+    document.querySelectorAll('.upcoming-item[data-glitch]').forEach(item => {
+      const titleEl = item.querySelector('.upcoming-title');
+      item.addEventListener('mouseenter', () => {
+        titleEl.classList.remove('glitch');
+        // Force reflow so animation restarts
+        void titleEl.offsetWidth;
+        titleEl.classList.add('glitch');
+      });
+    });
+
+  </script>
+</body>
+</html>
